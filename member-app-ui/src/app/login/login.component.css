@@ -1,0 +1,36 @@
+/* Full height background with a soft gradient */
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The Login Card */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border: none;
+  border-radius: 1rem; /* Rounded corners */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Soft, expensive shadow */
+}
+
+/* Brand Icon Wrapper */
+.brand-icon {
+  width: 60px;
+  height: 60px;
+  background-color: #0d6efd; /* Bootstrap Primary Blue */
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -40px auto 20px auto; /* Pulls the icon up half-way */
+  font-size: 1.5rem;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+}
+
+.form-floating > label {
+  color: #6c757d;
+}

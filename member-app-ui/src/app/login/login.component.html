@@ -1,0 +1,59 @@
+<div class="login-container px-3">
+  
+  <div class="card login-card p-4">
+    
+    <div class="brand-icon">
+      <i class="bi bi-shield-lock-fill"></i>
+    </div>
+
+    <div class="card-body">
+      <h3 class="text-center fw-bold mb-1">MemberHub</h3>
+      <p class="text-center text-muted mb-4">Welcome back! Please login.</p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-floating mb-3">
+          <input type="text" 
+                 class="form-control" 
+                 id="username" 
+                 placeholder="name@example.com" 
+                 formControlName="username"
+                 [class.is-invalid]="isFieldInvalid('username')">
+          <label for="username">Username</label>
+          <div class="invalid-feedback">
+            Username is required.
+          </div>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="password" 
+                 class="form-control" 
+                 id="password" 
+                 placeholder="Password" 
+                 formControlName="password"
+                 [class.is-invalid]="isFieldInvalid('password')">
+          <label for="password">Password</label>
+          <div class="invalid-feedback">
+            Password is required.
+          </div>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" 
+                  class="btn btn-primary btn-lg py-2 fw-semibold" 
+                  [disabled]="loginForm.invalid || isLoading">
+            
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isLoading ? 'Logging In...' : 'Log In' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="card-footer bg-white border-0 text-center py-3">
+      <small class="text-muted">Don't have an account? Please contact admin</small>
+    </div>
+    
+  </div>
+</div>

@@ -1,0 +1,32 @@
+/* Premium Table Headers */
+.table thead th {
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+/* Subtle Row Hover */
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s;
+}
+
+/* Card Styling */
+.card {
+  border-radius: 0.75rem; /* 12px rounded corners */
+  overflow: hidden;
+}
+
+/* Navbar Brand spacing */
+.navbar-brand {
+  letter-spacing: -0.5px;
+}
+
+/* Pagination Link Clean-up */
+.page-link:focus {
+  box-shadow: none;
+  background-color: #e9ecef;
+}

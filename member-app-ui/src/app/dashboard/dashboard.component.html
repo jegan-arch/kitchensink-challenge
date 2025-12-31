@@ -1,0 +1,117 @@
+<div class="container mt-4">
+  <div class="row">
+    
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0 fw-bold text-primary">New Member</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
+            
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="name" placeholder="John Doe" 
+                     formControlName="name" [class.is-invalid]="isFieldInvalid('name')">
+              <label for="name">Full Name</label>
+              <div class="invalid-feedback">Name is required (min 2 chars).</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="email" class="form-control" id="email" placeholder="name@example.com"
+                     formControlName="email" [class.is-invalid]="isFieldInvalid('email')">
+              <label for="email">Email Address</label>
+              <div class="invalid-feedback">Please enter a valid email.</div>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="phone" placeholder="9876543210"
+                     formControlName="phoneNumber" [class.is-invalid]="isFieldInvalid('phoneNumber')">
+              <label for="phone">Phone (Indian 10-digit)</label>
+              <div class="invalid-feedback">Must be 10 digits starting with 6-9.</div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" [disabled]="memberForm.invalid || isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isSubmitting ? 'Saving...' : 'Register Member' }}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold text-secondary">Member List</h5>
+          <span class="badge bg-light text-dark border">{{ allMembers.length }} Total</span>
+        </div>
+        
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr class="text-secondary small text-uppercase">
+                  <th class="ps-4">Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th class="text-end pe-4" *ngIf="isAdmin">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="isLoading">
+                  <td colspan="4" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                  </td>
+                </tr>
+
+                <tr *ngFor="let member of paginatedMembers">
+                  <td class="ps-4 fw-semibold">{{ member.name }}</td>
+                  <td class="text-muted">{{ member.email }}</td>
+                  <td>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                      +91 {{ member.phoneNumber }}
+                    </span>
+                  </td>
+                  
+                  <td class="text-end pe-4" *ngIf="isAdmin">
+                    <button class="btn btn-sm btn-light text-danger" 
+                            (click)="deleteMember(member.id)" 
+                            title="Delete Member">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-footer bg-white border-0 py-3" *ngIf="allMembers.length > pageSize">
+          <nav aria-label="Member pagination">
+            <ul class="pagination justify-content-end mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link border-0 text-dark" (click)="changePage(currentPage - 1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              <li class="page-item disabled">
+                <span class="page-link border-0 text-muted bg-transparent">
+                  Page {{ currentPage }} of {{ totalPages }}
+                </span>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button class="page-link border-0 text-dark" (click)="changePage(currentPage + 1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
