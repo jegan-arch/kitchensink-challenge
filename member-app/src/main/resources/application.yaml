@@ -1,0 +1,42 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: member-app-backend
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: kitchensink_db
+      username: admin
+      password: password
+      authentication-database: admin
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+app:
+  jwt:
+    secret: MySuperSecretKeyForTheModernizationChallenge123MustBeLongEnough
+    expiration-ms: 3600000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n'
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO
+    com.modern.kitchensink: DEBUG
