@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MemberService } from '../services/member.service';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
+import { MemberResponse } from '../models/member.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,6 +25,8 @@ export class DashboardComponent implements OnInit {
   isAdmin = false;
   isLoading = false;
   isSubmitting = false;
+  selectedMember: MemberResponse | null = null;
+  showModal: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,9 +36,20 @@ export class DashboardComponent implements OnInit {
     private router: Router
   ) {
     this.memberForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^[6-9]\d{9}$/)]]
+      name: ['', [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.maxLength(25),
+        Validators.pattern(/^[^0-9]*$/)
+      ]],
+      email: ['', [
+        Validators.required,
+        Validators.email
+      ]],
+      phoneNumber: ['', [
+        Validators.required,
+        Validators.pattern(/^[6-9]\d{9}$/)
+      ]]
     });
   }
 
@@ -61,14 +75,14 @@ export class DashboardComponent implements OnInit {
 
   updatePagination(): void {
     this.totalPages = Math.ceil(this.allMembers.length / this.pageSize);
-    
+
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
     }
 
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    
+
     this.paginatedMembers = this.allMembers.slice(startIndex, endIndex);
   }
 
@@ -79,6 +93,20 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  viewDetails(id: string) {
+    this.memberService.getMemberById(id).subscribe({
+      next: (data) => {
+        this.selectedMember = data;
+        this.showModal = true;
+      }
+    });
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedMember = null;
+  }
+
   onSubmit(): void {
     if (this.memberForm.invalid) return;
 
@@ -86,10 +114,10 @@ export class DashboardComponent implements OnInit {
     this.memberService.registerMember(this.memberForm.value).subscribe({
       next: (newMember: any) => {
         this.notificationService.showSuccess(`Member ${newMember.name} added successfully!`);
-        
+
         this.allMembers.push(newMember);
         this.updatePagination();
-        
+
         this.memberForm.reset();
         this.isSubmitting = false;
       },
@@ -103,7 +131,7 @@ export class DashboardComponent implements OnInit {
     this.memberService.deleteMember(id).subscribe({
       next: () => {
         this.notificationService.showSuccess('Member deleted successfully');
-        
+
         this.allMembers = this.allMembers.filter(m => m.id !== id);
         this.updatePagination();
       }

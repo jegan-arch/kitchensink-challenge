@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,13 +21,16 @@ public class Member extends BaseEntity {
 
     @NotBlank(message = "Name cannot be empty")
     @Size(min = 1, max = 25, message = "Name size must be between 1 and 25")
+    @Pattern(regexp = "[^0-9]*", message = "Name must not contain numbers")
     private String name;
 
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Must be a well-formed email address")
+    @Indexed(unique = true)
     private String email;
 
     @NotBlank(message = "Phone number cannot be empty")
-    @Pattern(regexp = "\\d{10,12}", message = "Phone number must be between 10 and 12 digits")
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Phone number must be valid 10-digit Indian number")
+    @Field("phone_number")
     private String phoneNumber;
 }

@@ -8,13 +8,17 @@ import { MemberRequest, MemberResponse } from '../models/member.model';
 })
 export class MemberService {
   
-  private readonly API_URL = 'http://localhost:8083/api/members';
+  private readonly API_URL = 'http://localhost:8083/api/member';
 
   constructor(private http: HttpClient) { }
 
   getAllMembers(): Observable<MemberResponse[]> {
-    return this.http.get<MemberResponse[]>(this.API_URL);
+    return this.http.get<MemberResponse[]>(this.API_URL + "/all");
   }
+
+  getMemberById(id: string): Observable<MemberResponse> {
+  return this.http.get<MemberResponse>(`${this.API_URL}/${id}`);
+}
 
   registerMember(member: MemberRequest): Observable<MemberResponse> {
     return this.http.post<MemberResponse>(this.API_URL, member);

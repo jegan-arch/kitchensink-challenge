@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -27,6 +28,15 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public MemberResponse getMemberDetails(String id) {
+        Optional<Member> memberOptional = memberRepository.findById(id);
+        if (memberOptional.isEmpty()) {
+            throw new KitchensinkException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        return mapToResponse(memberOptional.get());
     }
 
     @Override
@@ -73,7 +83,11 @@ public class MemberServiceImpl implements MemberService {
                 member.getId(),
                 member.getName(),
                 member.getEmail(),
-                member.getPhoneNumber()
+                member.getPhoneNumber(),
+                member.getCreatedAt(),
+                member.getUpdatedAt(),
+                member.getCreatedBy(),
+                member.getUpdatedBy()
         );
     }
 }
