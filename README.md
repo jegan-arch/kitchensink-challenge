@@ -26,7 +26,7 @@ docker-compose up --build -d
 
 | Service | URL | Description | Credentials |
 | :--- | :--- | :--- | :--- |
-| **User Interface** | [http://localhost:4200](http://localhost:4200) | Main Dashboard | Login required |
+| **User Interface** | [http://localhost](http://localhost) | Main Dashboard | Login required |
 | **Backend API** | [http://localhost:8083](http://localhost:8083) | API Root | Requires Token |
 | **Swagger UI** | [http://localhost:8083/swagger-ui.html](http://localhost:8083/swagger-ui.html) | API Documentation | N/A |
 | **System Health** | [http://localhost:8083/actuator/health](http://localhost:8083/actuator/health) | Monitoring Status | Public |
@@ -46,15 +46,17 @@ To test the "User" role (restricted permissions), use the Sign-up page or this C
 ```bash
 curl -X POST http://localhost:8083/api/v1/auth/signup \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin-token>" \
   -d '{
     "userName": "testuser",
     "name": "Standard User",
     "email": "user@test.com",
-    "password": "password123",
     "phoneNumber": "9876543210",
     "role": "ROLE_USER"
   }'
 ```
+The password for created member is "Welcome@123" 
+Note: On first login this has to be changed
 
 ### 4. Stop the Application
 To stop the containers and remove the active network:
@@ -69,7 +71,7 @@ docker-compose down
 The solution is orchestrated via **Docker Compose** as a cohesive unit.
 
 ### Core Stack
-* **Backend:** Java 21, Spring Boot 3.2+
+* **Backend:** Java 21, Spring Boot 4+
 * **Frontend:** Angular 16+, TypeScript
 * **Database:** MongoDB v7.0
 * **Containerization:** Docker & Docker Compose
@@ -85,7 +87,7 @@ The solution is orchestrated via **Docker Compose** as a cohesive unit.
 * ✅ **Strict Validation:**
     * **Phone:** Indian 10-digit format (`^[6-9]\d{9}$`).
     * **Email:** DB-level uniqueness via `@Indexed(unique=true)`.
-* ✅ **Quality Assurance:** High test coverage (**>90%**) using **JUnit 5**, **Mockito**, and **MockMvc**.
+* ✅ **Quality Assurance:** High test coverage (**>95%**) using **JUnit 5**, **Mockito**, and **MockMvc**.
 
 ---
 
@@ -102,7 +104,7 @@ The backend features comprehensive unit tests covering Controllers, Services, Se
 cd member-backend
 mvn test
 ```
-*Current Coverage: ~92%*
+*Current Coverage: ~95%*
 
 ### 2. Manual Execution
 **Backend:**
@@ -126,7 +128,7 @@ ng serve
 ```bash
 ├── member-backend      # Spring Boot Monolith
 │   ├── src/main        # Source code
-│   └── src/test        # JUnit 5 Tests (>90% coverage)
+│   └── src/test        # JUnit 5 Tests (>95% coverage)
 ├── member-app-ui       # Angular Frontend
 ├── docker-compose.yml  # Orchestration
 └── README.md           # Documentation

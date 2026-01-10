@@ -26,30 +26,30 @@ services:
     depends_on:
       - mongodb
 
-  # backend-service:
-  #   build: ./member-app
-  #   container_name: member-app-backend
-  #   ports:
-  #     - "8083:8083"
-  #   environment:
-  #     SPRING_DATA_MONGODB_HOST: mongodb
-  #     SPRING_DATA_MONGODB_PORT: 27017
-  #     SPRING_DATA_MONGODB_DATABASE: member_db
-  #     SPRING_DATA_MONGODB_USERNAME: admin
-  #     SPRING_DATA_MONGODB_PASSWORD: password
-  #     SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
-  #     APP_JWT_SECRET: MySuperSecretKeyForTheModernizationChallenge123MustBeLongEnough
-  #   depends_on:
-  #     - mongodb
+  backend-service:
+    build: ./member-app
+    container_name: member-app-backend
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: member_db
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: password
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
+      APP_JWT_SECRET: MySuperSecretKeyForTheModernizationChallenge123MustBeLongEnough
+    depends_on:
+      - mongodb
 
-  # member-app-ui:
-  #   build: ./member-app-ui
-  #   container_name: member-app-ui
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - backend-service
+  member-app-ui:
+    build: ./member-app-ui
+    container_name: member-app-ui
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-service
 
 volumes:
   mongo-data:
