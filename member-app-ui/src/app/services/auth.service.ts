@@ -5,23 +5,29 @@ import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 
-// 1. Strong Typing (No more 'any')
 export interface User {
-  username: string;
-  roles: string[];
+  id: string;
+  userName: string;
+  email: string;
+  role: string;
   token: string;
+  isPasswordTemporary?: boolean;
+}
+
+interface JwtPayload {
+  exp: number;
+  iat: number;
+  sub: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  
-  // Ideally, this comes from environment.ts
-  private readonly AUTH_API = 'http://localhost:8082/auth/';
+
+  private readonly AUTH_API = 'http://localhost:8083/api/v1/auth/';
   private readonly STORAGE_KEY = 'memberhub_user';
 
-  // 2. Reactive State (The "Source of Truth")
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$: Observable<User | null>;
 
@@ -31,36 +37,30 @@ export class AuthService {
     this.currentUser$ = this.currentUserSubject.asObservable();
   }
 
-  login(username: string, password: string): Observable<User> {
-    return this.http.post<User>(this.AUTH_API + 'login', { username, password })
+  login(userName: string, password: string): Observable<User> {
+    return this.http.post<User>(this.AUTH_API + 'login', { userName, password })
       .pipe(map(user => {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
         this.currentUserSubject.next(user);
-        
         return user;
       }));
   }
 
   public isLoggedIn(): boolean {
     const token = this.getJwtToken();
-    if (!token) {
-      return false;
-    }
+    if (!token) return false;
 
     if (this.isTokenExpired(token)) {
       this.logout();
       return false;
     }
-
     return true;
   }
 
   private isTokenExpired(token: string): boolean {
     try {
-      const decoded: any = jwtDecode(token);
-      const expirationDate = decoded.exp * 1000;
-      const currentDate = Date.now();
-      return currentDate > expirationDate; 
+      const decoded = jwtDecode<JwtPayload>(token);
+      return Date.now() > decoded.exp * 1000;
     } catch (error) {
       return true;
     }
@@ -80,9 +80,14 @@ export class AuthService {
     return this.getUser()?.token || null;
   }
 
-  public hasRole(role: string): boolean {
+  public getRole(): string {
     const user = this.getUser();
-    return user ? user.roles.includes(role) : false;
+    return user?.role || 'USER';
+  }
+
+  public hasRole(requiredRole: string): boolean {
+    const user = this.getUser();
+    return user ? user.role === requiredRole : false;
   }
 
   public isAdmin(): boolean {

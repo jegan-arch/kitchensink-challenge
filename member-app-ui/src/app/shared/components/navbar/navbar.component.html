@@ -13,7 +13,7 @@
         <ng-container *ngIf="authService.currentUser$ | async as user">
           <li class="nav-item">
             <span class="nav-link text-white">
-              Hello, <strong>{{ user.username }}</strong>
+              Hello, <strong>{{ user.userName }}</strong>
             </span>
           </li>
           <li class="nav-item ms-2">

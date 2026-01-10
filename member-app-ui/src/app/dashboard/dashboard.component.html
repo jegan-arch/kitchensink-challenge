@@ -1,182 +1,300 @@
 <div class="container mt-4">
-  <div class="row">
-
-    <div class="col-lg-4 mb-4">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
-          <h5 class="mb-0 fw-bold text-primary">New Member</h5>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
-
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="name" placeholder="John Doe" formControlName="name"
-                [class.is-invalid]="isFieldInvalid('name')">
-              <label for="name">Full Name</label>
-
-              <div class="invalid-feedback" *ngIf="memberForm.get('name')?.errors">
-                <div *ngIf="memberForm.get('name')?.hasError('required')">
-                  Name is required.
-                </div>
-                <div *ngIf="memberForm.get('name')?.hasError('maxlength')">
-                  Name cannot exceed 25 characters.
-                </div>
-                <div *ngIf="memberForm.get('name')?.hasError('pattern')">
-                  Name must not contain numbers.
-                </div>
-              </div>
-            </div>
-
-            <div class="form-floating mb-3">
-              <input type="email" class="form-control" id="email" placeholder="name@example.com" formControlName="email"
-                [class.is-invalid]="isFieldInvalid('email')">
-              <label for="email">Email Address</label>
-
-              <div class="invalid-feedback" *ngIf="memberForm.get('email')?.errors">
-                <div *ngIf="memberForm.get('email')?.hasError('required')">
-                  Email is required.
-                </div>
-                <div *ngIf="memberForm.get('email')?.hasError('email')">
-                  Please enter a valid email address.
-                </div>
-              </div>
-            </div>
-
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="phone" placeholder="9876543210" formControlName="phoneNumber"
-                [class.is-invalid]="isFieldInvalid('phoneNumber')">
-              <label for="phone">Phone (Indian 10-digit)</label>
-
-              <div class="invalid-feedback" *ngIf="memberForm.get('phoneNumber')?.errors">
-                <div *ngIf="memberForm.get('phoneNumber')?.hasError('required')">
-                  Phone number is required.
-                </div>
-                <div *ngIf="memberForm.get('phoneNumber')?.hasError('pattern')">
-                  Must be a valid 10-digit Indian number (starts with 6-9).
-                </div>
-              </div>
-            </div>
-
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary" [disabled]="memberForm.invalid || isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isSubmitting ? 'Saving...' : 'Register Member' }}
-              </button>
-            </div>
-
-          </form>
-        </div>
+  
+  <div *ngIf="isForceChange" class="d-flex flex-column align-items-center justify-content-center py-5">
+      <div class="text-center">
+          <h2 class="fw-bold text-dark mb-3">Account Setup Required</h2>
+          <p class="text-muted">Please secure your account to continue.</p>
       </div>
+  </div>
+
+  <div *ngIf="!isForceChange">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+        <h2 class="fw-bold text-dark">Dashboard</h2>
+        <p class="text-muted mb-0">Logged in as <span class="fw-semibold text-primary">{{ currentUser?.userName }}</span></p>
+        </div>
+        <div>
+        <span class="badge px-3 py-2 rounded-pill" [ngClass]="getRoleBadgeClass(currentRole)">
+            {{ currentRole.replace('ROLE_', '') }}
+        </span>
+        </div>
     </div>
 
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold text-secondary">Member List</h5>
-          <span class="badge bg-light text-dark border">{{ allMembers.length }} Total</span>
+    <ng-container *ngIf="isAdmin; else userView">
+        <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+            
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                <h5 class="mb-0 fw-bold text-secondary">Directory</h5>
+                <small class="text-muted">{{ allMembers.length }} Records Found</small>
+                </div>
+                <button class="btn btn-primary" (click)="openAddMemberModal()">
+                <i class="bi bi-person-plus-fill me-2"></i> Add New Member
+                </button>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr class="text-secondary small text-uppercase">
+                        <th class="ps-4">Identity</th>
+                        <th>Role</th>
+                        <th>Contact</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngIf="isLoading"><td colspan="4" class="text-center py-5"><span class="spinner-border text-primary"></span></td></tr>
+                    
+                    <tr *ngIf="!isLoading && allMembers.length === 0">
+                        <td colspan="4" class="text-center py-5 text-muted">No members found.</td>
+                    </tr>
+
+                    <tr *ngFor="let member of paginatedMembers">
+                        <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-3 bg-light text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px; font-size:14px">
+                            {{ member.name.charAt(0).toUpperCase() }}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ member.name }}</div>
+                                <div class="small text-muted">@{{ member.userName }}</div>
+                            </div>
+                        </div>
+                        </td>
+                        <td>
+                        <span class="badge" [ngClass]="getRoleBadgeClass(member.role)">
+                            {{ member.role.replace('ROLE_', '') }}
+                        </span>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="small text-dark">{{ member.email }}</span>
+                                <span class="small text-muted">+91 {{ member.phoneNumber }}</span>
+                            </div>
+                        </td>
+                        
+                        <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-light text-primary me-1" (click)="viewDetails(member.id)" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </button>
+
+                        <ng-container *ngIf="canModify(member)">
+                            <button class="btn btn-sm btn-light text-warning me-1" (click)="openEditMemberModal(member)" title="Edit Member">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            
+                            <button class="btn btn-sm btn-light text-danger" (click)="deleteMember(member)" title="Delete Member">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </ng-container>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-white border-0 py-3" *ngIf="allMembers.length > pageSize">
+                <nav>
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                    <button class="page-link border-0 text-dark" (click)="changePage(currentPage - 1)"><i class="bi bi-chevron-left"></i></button>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link border-0 text-muted">Page {{ currentPage }}</span></li>
+                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <button class="page-link border-0 text-dark" (click)="changePage(currentPage + 1)"><i class="bi bi-chevron-right"></i></button>
+                    </li>
+                </ul>
+                </nav>
+            </div>
+            </div>
         </div>
+        </div>
+    </ng-container>
 
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light">
-                <tr class="text-secondary small text-uppercase">
-                  <th class="ps-4">Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th class="text-end pe-4" *ngIf="isAdmin">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngIf="isLoading">
-                  <td colspan="4" class="text-center py-4 text-muted">
-                    <span class="spinner-border spinner-border-sm me-2"></span> Loading...
-                  </td>
-                </tr>
+    <ng-template #userView>
+        <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm text-center p-4">
+            <div *ngIf="isLoading" class="py-5"><div class="spinner-border text-primary"></div></div>
+            
+            <div *ngIf="selectedMember && !isLoading">
+                <div class="mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
+                    {{ selectedMember.name.charAt(0).toUpperCase() }}
+                </div>
+                </div>
+                
+                <h3 class="fw-bold mb-1">{{ selectedMember.name }}</h3>
+                <p class="text-muted mb-4">@{{ selectedMember.userName }}</p>
+                
+                <div class="card bg-light border-0 text-start p-3 mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">Role</span>
+                    <span class="badge bg-secondary">USER</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">Email</span>
+                    <span class="fw-medium">{{ selectedMember.email }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">Phone</span>
+                    <span class="fw-medium">+91 {{ selectedMember.phoneNumber }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small text-uppercase fw-bold">Member Since</span>
+                    <span class="fw-medium">{{ selectedMember.createdAt | date:'mediumDate' }}</span>
+                </div>
+                </div>
 
-                <tr *ngFor="let member of paginatedMembers">
-                  <td>
-                    <a href="javascript:void(0)" (click)="viewDetails(member.id)" class="member-link"
-                      title="View details for {{ member.name }}">
-                      {{ member.name }}
-                    </a>
-                  </td>
-                  <td class="text-muted">{{ member.email }}</td>
-                  <td>
-                    <span class="badge bg-info bg-opacity-10 text-info border border-info">
-                      +91 {{ member.phoneNumber }}
-                    </span>
-                  </td>
-
-                  <td class="text-end pe-4" *ngIf="isAdmin">
-                    <button class="btn btn-sm btn-light text-danger" (click)="deleteMember(member.id)"
-                      title="Delete Member">
-                      <i class="bi bi-trash"></i>
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-primary" (click)="openEditMemberModal(selectedMember)">
+                        <i class="bi bi-pencil-square me-2"></i> Edit Profile
                     </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+                    <button class="btn btn-outline-secondary" (click)="openPasswordModal()">
+                        <i class="bi bi-key-fill me-2"></i> Change Password
+                    </button>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </ng-template>
+
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showMemberModal" style="z-index: 1050;"></div>
+<div class="modal fade" [class.show]="showMemberModal" [style.display]="showMemberModal ? 'block' : 'none'" tabindex="-1" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">{{ isEditMode ? 'Edit Profile' : 'Add New Member' }}</h5>
+        <button type="button" class="btn-close" (click)="closeMemberModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
+          
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="userName" placeholder="userName" formControlName="userName" 
+                   [class.is-invalid]="isFieldInvalid('userName')">
+            <label for="userName">userName</label>
+            <div class="invalid-feedback">Required (3-20 chars, no spaces).</div>
           </div>
-        </div>
 
-        <div class="card-footer bg-white border-0 py-3" *ngIf="allMembers.length > pageSize">
-          <nav aria-label="Member pagination">
-            <ul class="pagination justify-content-end mb-0">
-              <li class="page-item" [class.disabled]="currentPage === 1">
-                <button class="page-link border-0 text-dark" (click)="changePage(currentPage - 1)">
-                  <i class="bi bi-chevron-left"></i>
-                </button>
-              </li>
-              <li class="page-item disabled">
-                <span class="page-link border-0 text-muted bg-transparent">
-                  Page {{ currentPage }} of {{ totalPages }}
-                </span>
-              </li>
-              <li class="page-item" [class.disabled]="currentPage === totalPages">
-                <button class="page-link border-0 text-dark" (click)="changePage(currentPage + 1)">
-                  <i class="bi bi-chevron-right"></i>
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
+          <div class="form-floating mb-3" *ngIf="isAdmin">
+            <select class="form-select" id="role" formControlName="role" [class.is-invalid]="isFieldInvalid('role')">
+               <option *ngFor="let role of availableRoles" [value]="role.value">{{ role.label }}</option>
+            </select>
+            <label for="role">Assign Role</label>
+          </div>
 
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="name" placeholder="John Doe" formControlName="name" 
+                   [class.is-invalid]="isFieldInvalid('name')">
+            <label for="name">Full Name</label>
+            <div class="invalid-feedback">Name is required (3-25 chars).</div>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="email" placeholder="Email" formControlName="email" 
+                   [class.is-invalid]="isFieldInvalid('email')">
+            <label for="email">Email</label>
+            <div class="invalid-feedback">Valid email required.</div>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="phone" placeholder="Phone" formControlName="phoneNumber" 
+                   [class.is-invalid]="isFieldInvalid('phoneNumber')">
+            <label for="phone">Phone (Indian 10-digit)</label>
+            <div class="invalid-feedback">Phone number must be a valid 10 digit Indian number (starts with 6-9).</div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary" [disabled]="memberForm.invalid || isSubmitting">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isEditMode ? 'Save Changes' : 'Create Account' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
-<div class="modal-backdrop fade show" *ngIf="showModal"></div>
 
-<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1"
-  role="dialog">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Member Details</h5>
-        <button type="button" class="btn-close" (click)="closeModal()"></button>
+<div class="modal-backdrop fade show" *ngIf="showDetailModal" style="z-index: 1050;"></div>
+<div class="modal fade" [class.show]="showDetailModal" [style.display]="showDetailModal ? 'block' : 'none'" tabindex="-1" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Member Details</h5>
+        <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
       </div>
+      <div class="modal-body pt-0" *ngIf="selectedMember">
+        <div class="text-center mb-4">
+           <div class="avatar-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 64px; height: 64px; font-size: 24px;">
+               {{ selectedMember.name.charAt(0).toUpperCase() }}
+           </div>
+           <h4 class="fw-bold">{{ selectedMember.name }}</h4>
+           <div class="text-muted mb-2">@{{ selectedMember.userName }}</div>
+           <span class="badge" [ngClass]="getRoleBadgeClass(selectedMember.role)">{{ selectedMember.role }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">ID</span> <span class="font-monospace small">{{ selectedMember.id }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Email</span> <span>{{ selectedMember.email }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Created By</span> <span>{{ selectedMember.createdBy || 'System' }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Created At</span> <span>{{ selectedMember.createdAt }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Last Updated By</span> <span>{{ selectedMember.updatedBy || 'System' }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Last Updated At</span> <span>{{ selectedMember.updatedAt }}</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="modal-backdrop fade show" *ngIf="showPasswordModal" style="z-index: 1060;"></div>
+<div class="modal fade" [class.show]="showPasswordModal" [style.display]="showPasswordModal ? 'block' : 'none'" tabindex="-1" style="z-index: 1065;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Change Password</h5>
+        <button *ngIf="!isForceChange" type="button" class="btn-close" (click)="closePasswordModal()"></button>
+      </div>
       <div class="modal-body">
-        <div *ngIf="selectedMember">
-          <div class="alert alert-info">
-            <strong>ID:</strong> {{ selectedMember.id }}
+        
+        <div *ngIf="isForceChange" class="alert alert-warning small mb-3">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i> You must change your temporary password to continue.
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="oldPass" formControlName="oldPassword" placeholder="Old">
+            <label for="oldPass">Current Password</label>
+            <div class="text-danger small mt-1" *ngIf="passwordForm.get('oldPassword')?.touched && passwordForm.get('oldPassword')?.invalid">Required</div>
           </div>
-
-          <pre class="bg-light p-3 border rounded"><code>{{ selectedMember | json }}</code></pre>
-        </div>
-
-        <div *ngIf="!selectedMember" class="text-center">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p>Loading details...</p>
-        </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="newPass" formControlName="newPassword" placeholder="New">
+            <label for="newPass">New Password</label>
+            <div class="text-danger small mt-1" *ngIf="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid">Min 6 characters</div>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="confirmPass" formControlName="confirmPassword" placeholder="Confirm">
+            <label for="confirmPass">Confirm New Password</label>
+            <div class="text-danger small mt-1" *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched">Passwords do not match</div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid || isSubmitting">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span> Update Password
+            </button>
+          </div>
+        </form>
       </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
-      </div>
-
     </div>
   </div>
 </div>

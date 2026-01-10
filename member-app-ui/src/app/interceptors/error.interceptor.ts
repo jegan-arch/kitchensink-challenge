@@ -23,15 +23,26 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         
+        if (request.url.includes('/auth/login') || request.url.includes('/auth/signup')) {
+            return throwError(() => error);
+        }
+
         let errorMessage = 'An unexpected error occurred';
 
         if (error.error instanceof ErrorEvent) {
           errorMessage = `Network Error: ${error.error.message}`;
         } else {
+          if (error.status === 401) {
+             this.notificationService.showError("Session expired. Please login again.");
+             this.router.navigate(['/login']);
+             return throwError(() => error); 
+          }
+          
           if (error.error && error.error.message) {
             errorMessage = error.error.message;
           }
         }
+        
         this.notificationService.showError(errorMessage);
         return throwError(() => error);
       })

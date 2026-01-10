@@ -9,7 +9,7 @@ spring:
     mongodb:
       host: localhost
       port: 27017
-      database: kitchensink_db
+      database: member_test_db
       username: admin
       password: password
       authentication-database: admin
@@ -27,10 +27,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, metrics
-  endpoint:
-    health:
-      show-details: always
+        include: health, info, metric
 
 logging:
   pattern:
@@ -39,4 +36,4 @@ logging:
     root: INFO
     org.springframework.security: DEBUG
     org.springframework.web: INFO
-    com.modern.kitchensink: DEBUG
+    com.modern.member: DEBUG

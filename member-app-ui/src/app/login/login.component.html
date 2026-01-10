@@ -15,11 +15,12 @@
         <div class="form-floating mb-3">
           <input type="text" 
                  class="form-control" 
-                 id="username" 
-                 placeholder="name@example.com" 
-                 formControlName="username"
-                 [class.is-invalid]="isFieldInvalid('username')">
-          <label for="username">Username</label>
+                 id="userName" 
+                 placeholder="userName" 
+                 formControlName="userName"
+                 autocomplete="userName"
+                 [class.is-invalid]="isFieldInvalid('userName')">
+          <label for="userName">Username</label>
           <div class="invalid-feedback">
             Username is required.
           </div>
@@ -31,6 +32,7 @@
                  id="password" 
                  placeholder="Password" 
                  formControlName="password"
+                 autocomplete="current-password"
                  [class.is-invalid]="isFieldInvalid('password')">
           <label for="password">Password</label>
           <div class="invalid-feedback">

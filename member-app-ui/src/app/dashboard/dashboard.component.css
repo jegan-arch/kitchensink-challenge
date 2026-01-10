@@ -26,17 +26,22 @@
   background-color: #e9ecef;
 }
 
-.member-link {
-  color: #2c3e50; 
-  text-decoration: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
 }
 
-.member-link:hover {
-  color: #0d6efd;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+/* Modal Animations */
+.modal.fade .modal-dialog {
+  transition: transform 0.2s ease-out;
+  transform: translate(0, -20px);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
 }
